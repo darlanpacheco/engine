@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      canvas {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+
+    <script type="module">
+      import { createContext } from "./context.js";
+      import { createWindowBindings } from "./window.js";
+      import { createWebGLBindings as createGpuBindings } from "./gpu.js";
+      import { createShaderBindings } from "./shader.js";
+      import { createTextureManager } from "./texture.js";
+      import { createAudioManager } from "./audio.js";
+      import { createGlobalManager } from "./global.js";
+      import { createInputManager } from "./input.js";
+
+      const canvas = document.getElementById("canvas");
+
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+
+      const gl = canvas.getContext("webgl2");
+
+      let wasm;
+      const getMemory = () => wasm.exports.memory.buffer;
+      const getWasmExports = () => wasm.exports;
+
+      const ctx = createContext();
+
+      const globalManager = createGlobalManager(canvas, getMemory);
+      const inputManager = createInputManager(getMemory);
+      inputManager.initListeners(canvas);
+
+      const windowBindings = createWindowBindings(gl, getMemory);
+      const gpuBindings = createGpuBindings(gl, getMemory, ctx);
+      const shaderBindings = createShaderBindings(gl, getMemory, ctx);
+
+      const textureManager = createTextureManager(getWasmExports, getMemory);
+      const audioManager = createAudioManager(getMemory);
+
+      const imports = {
+        env: {
+          ...textureManager.bindings,
+          ...windowBindings,
+          ...gpuBindings,
+          ...shaderBindings,
+          ...audioManager.bindings,
+          ...globalManager.bindings,
+          ...inputManager.bindings,
+        },
+      };
+
+      WebAssembly.instantiateStreaming(fetch("game.wasm"), imports).then(
+        async ({ instance }) => {
+          wasm = instance;
+
+          console.log("WASM");
+
+          if (wasm.exports.main) {
+            wasm.exports.main();
+          }
+
+          let lastTime = performance.now();
+
+          function frame(now) {
+            const deltaTime = Math.min((now - lastTime) / 1000.0, 0.1);
+            lastTime = now;
+
+            globalManager.setDeltaTime(deltaTime);
+
+            if (wasm.exports.tick) {
+              wasm.exports.tick();
+            }
+
+            requestAnimationFrame(frame);
+          }
+
+          requestAnimationFrame(frame);
+        },
+      );
+    </script>
+  </body>
+</html>
