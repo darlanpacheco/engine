@@ -37,10 +37,10 @@ pub fn get_projection_3d(aspect_ratio: f32) [16]f32 {
 
     return projection;
 }
-pub fn get_mouse_position_viewport(window_size: [2]i32, viewport_size: [2]i32, mouse_position: [2]i32) [2]i32 {
+pub fn get_mouse_position_viewport(window_size: [2]i32, viewport_size: [2]i32, mouse_position: [2]f32) [2]f32 {
     return .{
-        @divTrunc(mouse_position[0] * viewport_size[0], window_size[0]),
-        @divTrunc(mouse_position[1] * viewport_size[1], window_size[1]),
+        (mouse_position[0] * @as(f32, @floatFromInt(viewport_size[0]))) / @as(f32, @floatFromInt(window_size[0])),
+        (mouse_position[1] * @as(f32, @floatFromInt(viewport_size[1]))) / @as(f32, @floatFromInt(window_size[1])),
     };
 }
 

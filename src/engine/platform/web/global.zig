@@ -43,16 +43,15 @@ pub fn get_window_size(window: api.api) [2]i32 {
     return .{ size[0], size[1] };
 }
 
-pub fn get_mouse_position(window: api.api, window_size: [2]i32) [2]i32 {
+pub fn get_mouse_position(window: api.api, window_size: [2]i32) [2]f32 {
     _ = window;
-    _ = window_size;
 
     var position: [2]f64 = .{ 0, 0 };
     web_get_mouse_position(&position[0], &position[1]);
 
     return .{
-        @intFromFloat(position[0]),
-        @intFromFloat(position[1]),
+        std.math.clamp(@as(f32, @floatCast(position[0])), 0.0, @as(f32, @floatFromInt(window_size[0])) - 1.0),
+        std.math.clamp(@as(f32, @floatCast(position[1])), 0.0, @as(f32, @floatFromInt(window_size[1])) - 1.0),
     };
 }
 

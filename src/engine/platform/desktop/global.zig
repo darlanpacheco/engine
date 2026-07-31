@@ -69,18 +69,19 @@ pub fn get_window_size(window: api) [2]i32 {
     return .{ @intCast(window_size[0]), @intCast(window_size[1]) };
 }
 
-pub fn get_mouse_position(window: api, window_size: [2]i32) [2]i32 {
+pub fn get_mouse_position(window: api, window_size: [2]i32) [2]f32 {
     var position: [2]f64 = .{ 0, 0 };
 
     glfw.glfwGetCursorPos(window, &position[0], &position[1]);
 
-    const position2i = [2]i32{
-        @intFromFloat(position[0]), @intFromFloat(position[1]),
+    const position_f32 = [2]f32{
+        @floatCast(position[0]),
+        @floatCast(position[1]),
     };
 
     return .{
-        std.math.clamp(position2i[0], 0, window_size[0] - 1),
-        std.math.clamp(position2i[1], 0, window_size[1] - 1),
+        std.math.clamp(position_f32[0], 0.0, @as(f32, @floatFromInt(window_size[0])) - 1.0),
+        std.math.clamp(position_f32[1], 0.0, @as(f32, @floatFromInt(window_size[1])) - 1.0),
     };
 }
 
