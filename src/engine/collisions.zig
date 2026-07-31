@@ -2,7 +2,7 @@ const std = @import("std");
 const api = @import("platform");
 const engine = @import("engine");
 
-pub fn next_step_2d(
+pub fn check_step_2d(
     id: usize,
     size: [2]f32,
     position: [2]f32,
@@ -24,16 +24,22 @@ pub fn next_step_2d(
             continue;
         }
 
-        const overlap =
-            position_next[0] < hitbox_position[0] + hitbox_size[0] and
-            position_next[0] + size[0] > hitbox_position[0] and
-            position_next[1] < hitbox_position[1] + hitbox_size[1] and
-            position_next[1] + size[1] > hitbox_position[1];
-
-        if (overlap) {
+        if (check_collision_2d(position_next, size, hitbox_position, hitbox_size)) {
             return true;
         }
     }
 
     return false;
+}
+
+pub fn check_collision_2d(
+    pos_a: [2]f32,
+    size_a: [2]f32,
+    pos_b: [2]f32,
+    size_b: [2]f32,
+) bool {
+    return pos_a[0] < pos_b[0] + size_b[0] and
+        pos_a[0] + size_a[0] > pos_b[0] and
+        pos_a[1] < pos_b[1] + size_b[1] and
+        pos_a[1] + size_a[1] > pos_b[1];
 }
