@@ -4,6 +4,7 @@ const engine = @import("engine");
 
 const MAX_SOUNDS = 256;
 var ma_sounds: [MAX_SOUNDS]?*api.global.audio.ma_sound = [_]?*api.global.audio.ma_sound{null} ** MAX_SOUNDS;
+var audio_states: [MAX_SOUNDS]i32 = [_]i32{0} ** MAX_SOUNDS;
 
 var global_mixer: ?*api.global.audio.ma_engine = null;
 var initialized: bool = false;
@@ -34,6 +35,7 @@ pub fn audio_stop() void {
             slot.* = null;
         }
     }
+    @memset(&audio_states, 0);
 
     if (global_mixer) |mixer| {
         api.global.audio.ma_engine_uninit(mixer);
@@ -57,7 +59,7 @@ pub fn audio_new(path: []const u8) u32 {
         }
     }
 
-    const idx = slot_index orelse @panic("max audio sounds reached");
+    const index = slot_index orelse @panic("max audio sounds reached");
 
     var path_buffer: [256]u8 = undefined;
     const c_path = api.global.c_string(&path_buffer, path);
@@ -70,39 +72,52 @@ pub fn audio_new(path: []const u8) u32 {
         @panic("audio load file error");
     }
 
-    ma_sounds[idx] = sound;
+    ma_sounds[index] = sound;
+    audio_states[index] = 0;
 
-    return @intCast(idx + 1);
+    return @intCast(index + 1);
 }
 pub fn audio_delete(audio_id: u32) void {
     if (audio_id == 0) return;
-    const idx = @as(usize, @intCast(audio_id)) - 1;
-    if (idx < MAX_SOUNDS) {
-        if (ma_sounds[idx]) |s| {
+    const index = @as(usize, @intCast(audio_id)) - 1;
+    if (index < MAX_SOUNDS) {
+        if (ma_sounds[index]) |s| {
             api.global.audio.ma_sound_uninit(s);
             std.heap.page_allocator.destroy(s);
-            ma_sounds[idx] = null;
+            ma_sounds[index] = null;
+            audio_states[index] = 0;
         }
     }
 }
-pub fn audio_play(audio_id: u32) void {
+pub fn audio_play(audio_id: u32, fixed: bool) void {
     if (audio_id == 0) return;
-    const idx = @as(usize, @intCast(audio_id)) - 1;
-    if (idx < MAX_SOUNDS) {
-        if (ma_sounds[idx]) |s| {
-            if (api.global.audio.ma_sound_at_end(s) == api.global.audio.MA_TRUE) {
-                _ = api.global.audio.ma_sound_seek_to_pcm_frame(s, 0);
-            }
-            _ = api.global.audio.ma_sound_start(s);
+    const index = @as(usize, @intCast(audio_id)) - 1;
+    if (index >= MAX_SOUNDS) return;
+
+    const s = ma_sounds[index] orelse return;
+
+    const current_state = 1;
+    const last_state = audio_states[index];
+    audio_states[index] = current_state;
+
+    const should_play = if (fixed)
+        (current_state == 1 and last_state == 0)
+    else
+        true;
+
+    if (should_play) {
+        if (api.global.audio.ma_sound_at_end(s) == api.global.audio.MA_TRUE) {
+            _ = api.global.audio.ma_sound_seek_to_pcm_frame(s, 0);
         }
+        _ = api.global.audio.ma_sound_start(s);
     }
 }
 
 pub fn set_audio_volume(audio_id: u32, volume: i32) void {
     if (audio_id == 0) return;
-    const idx = @as(usize, @intCast(audio_id)) - 1;
-    if (idx < MAX_SOUNDS) {
-        if (ma_sounds[idx]) |s| {
+    const index = @as(usize, @intCast(audio_id)) - 1;
+    if (index < MAX_SOUNDS) {
+        if (ma_sounds[index]) |s| {
             const volume1f = @as(f32, @floatFromInt(volume));
             const clamped_volume = std.math.clamp(volume1f / 100.0, 0.0, 1.0);
             api.global.audio.ma_sound_set_volume(s, clamped_volume);

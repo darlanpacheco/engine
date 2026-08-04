@@ -6,7 +6,7 @@ extern fn web_audio_start() void;
 extern fn web_audio_stop() void;
 extern fn web_audio_new(path: [*:0]const u8) u32;
 extern fn web_audio_delete(id: u32) void;
-extern fn web_audio_play(id: u32) void;
+extern fn web_audio_play(id: u32, fixed: bool) void;
 extern fn web_set_audio_volume(id: u32, volume: i32) void;
 extern fn web_set_global_volume(volume: i32) void;
 
@@ -38,16 +38,25 @@ pub fn audio_new(path: []const u8) u32 {
     return id;
 }
 pub fn audio_delete(audio_id: u32) void {
-    if (audio_id == 0) return;
+    if (audio_id == 0) {
+        return;
+    }
+
     web_audio_delete(audio_id);
 }
-pub fn audio_play(audio_id: u32) void {
-    if (audio_id == 0) return;
-    web_audio_play(audio_id);
+pub fn audio_play(audio_id: u32, fixed: bool) void {
+    if (audio_id == 0) {
+        return;
+    }
+
+    web_audio_play(audio_id, fixed);
 }
 
 pub fn set_audio_volume(audio_id: u32, volume: i32) void {
-    if (audio_id == 0) return;
+    if (audio_id == 0) {
+        return;
+    }
+
     web_set_audio_volume(audio_id, volume);
 }
 pub fn set_global_volume(volume: i32) void {

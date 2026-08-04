@@ -1,5 +1,6 @@
 export function createAudioManager(getMemory) {
   const audioRegistry = new Map();
+  const audioStates = new Map();
   let nextAudioId = 1;
   let globalAudioCtx = null;
 
@@ -41,6 +42,7 @@ export function createAudioManager(getMemory) {
 
     const placeholderBuffer = audioCtx.createBuffer(1, 1, 22050);
     audioRegistry.set(id, { audioCtx, audioBuffer: placeholderBuffer });
+    audioStates.set(id, 0);
 
     const request = new XMLHttpRequest();
     request.open("GET", url, true);
@@ -63,9 +65,17 @@ export function createAudioManager(getMemory) {
     return id;
   }
 
-  function web_audio_play(id, loop = 0) {
+  function web_audio_play(id, fixed, loop = 0) {
     const audioObj = audioRegistry.get(id);
     if (!audioObj) return;
+
+    const current_state = 1;
+    const last_state = audioStates.get(id) || 0;
+    audioStates.set(id, current_state);
+
+    const should_play = fixed ? current_state === 1 && last_state === 0 : true;
+
+    if (!should_play) return;
 
     const { audioCtx, audioBuffer } = audioObj;
     if (audioCtx.state === "suspended") {
@@ -88,8 +98,9 @@ export function createAudioManager(getMemory) {
       web_audio_new: (ptr) => web_audio_new(ptr),
       web_audio_delete: (id) => {
         audioRegistry.delete(id);
+        audioStates.delete(id);
       },
-      web_audio_play: (id) => web_audio_play(id, 0),
+      web_audio_play: (id, fixed) => web_audio_play(id, fixed === 1, 0),
       web_set_audio_volume: (id, volume) => {},
       web_set_global_volume: (volume) => {},
     },
