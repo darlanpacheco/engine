@@ -14,7 +14,7 @@ export function createAudioManager(getMemory) {
     return globalAudioCtx;
   }
 
-  ["click", "keydown", "touchstart"].forEach((event) => {
+  ["click", "keydown", "touchstart", "mousedown"].forEach((event) => {
     window.addEventListener(
       event,
       () => {
@@ -34,22 +34,33 @@ export function createAudioManager(getMemory) {
     return new TextDecoder().decode(bytes.subarray(ptr, end));
   }
 
-  async function web_audio_new(url) {
+  function web_audio_new(ptr) {
+    const url = readWasmString(ptr);
     const audioCtx = getAudioContext();
+    const id = nextAudioId++;
 
-    try {
-      const resposta = await fetch(url);
-      const arrayBuffer = await resposta.arrayBuffer();
-      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    const placeholderBuffer = audioCtx.createBuffer(1, 1, 22050);
+    audioRegistry.set(id, { audioCtx, audioBuffer: placeholderBuffer });
 
-      const id = nextAudioId++;
-      audioRegistry.set(id, { audioCtx, audioBuffer });
-      // console.log("Áudio carregado e pronto! ID:", id);
-      return id;
-    } catch (erro) {
-      // console.error("Erro ao carregar o áudio:", erro);
-      return 0;
-    }
+    const request = new XMLHttpRequest();
+    request.open("GET", url, true);
+    request.responseType = "arraybuffer";
+    request.onload = function () {
+      if (request.status === 200) {
+        audioCtx.decodeAudioData(
+          request.response,
+          (buffer) => {
+            audioRegistry.set(id, { audioCtx, audioBuffer: buffer });
+          },
+          (err) => {
+            console.error("Erro ao decodificar áudio:", url, err);
+          },
+        );
+      }
+    };
+    request.send();
+
+    return id;
   }
 
   function web_audio_play(id, loop = 0) {
@@ -57,7 +68,6 @@ export function createAudioManager(getMemory) {
     if (!audioObj) return;
 
     const { audioCtx, audioBuffer } = audioObj;
-
     if (audioCtx.state === "suspended") {
       audioCtx.resume();
     }
@@ -67,18 +77,15 @@ export function createAudioManager(getMemory) {
     source.loop = loop !== 0;
     source.connect(audioCtx.destination);
     source.start(0);
-
-    return source;
   }
 
   return {
     bindings: {
-      web_audio_start: () => {},
-      web_audio_stop: () => {},
-      web_audio_new: async (ptr) => {
-        const url = readWasmString(ptr);
-        return await web_audio_new(url);
+      web_audio_start: () => {
+        getAudioContext();
       },
+      web_audio_stop: () => {},
+      web_audio_new: (ptr) => web_audio_new(ptr),
       web_audio_delete: (id) => {
         audioRegistry.delete(id);
       },

@@ -51,6 +51,16 @@ pub fn get_size_scaled_2d(size: [2]i32, scale: [2]f32) [2]f32 {
     };
 }
 
+pub fn find_char_id(character: u8, font_map: []const []const u8) i32 {
+    var current_id: i32 = 0;
+    for (font_map) |current_row| {
+        for (current_row) |row_char| {
+            if (row_char == character) return current_id;
+            current_id += 1;
+        }
+    }
+    return -1;
+}
 pub fn get_text_size_scaled(text: []const u8, font_size: [2]i32, scale: [2]f32) [2]f32 {
     const length = @as(f32, @floatFromInt(text.len));
 

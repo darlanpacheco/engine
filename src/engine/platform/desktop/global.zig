@@ -15,7 +15,7 @@ const miniaudio_lib = @cImport({
     @cInclude("miniaudio.h");
 });
 const cgltf_lib = @cImport({
-    @cInclude("gltf.h"); // rename it, bro. It's cgltf.
+    @cInclude("cgltf.h");
 });
 
 pub const glfw = glfw_lib;
