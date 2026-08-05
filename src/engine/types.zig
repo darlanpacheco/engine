@@ -1,3 +1,7 @@
+const std = @import("std");
+const api = @import("platform");
+const engine = @import("engine");
+
 pub const GL_VERTEX_SHADER: u32 = 0x8B31;
 pub const GL_FRAGMENT_SHADER: u32 = 0x8B30;
 

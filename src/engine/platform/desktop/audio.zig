@@ -1,6 +1,7 @@
 const std = @import("std");
 const api = @import("platform");
 const engine = @import("engine");
+const glfw = api.global.glfw;
 
 const MAX_SOUNDS = 256;
 var ma_sounds: [MAX_SOUNDS]?*api.global.audio.ma_sound = [_]?*api.global.audio.ma_sound{null} ** MAX_SOUNDS;
