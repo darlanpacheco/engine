@@ -61,3 +61,8 @@ pub fn get_gamepad_ids() [16]i32 {
 
     return ids;
 }
+
+pub fn window_should_close(window: api.api, value: bool) void {
+    _ = window;
+    _ = value;
+}

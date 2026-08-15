@@ -137,12 +137,17 @@ pub fn vsync(value: bool) void {
 //     }
 // }
 
-pub fn window_should_close(window: api) bool {
-    return glfw.glfwWindowShouldClose(window) == 0;
-}
 pub fn window_events() void {
     glfw.glfwPollEvents();
 }
-pub fn close_window(window: api) void {
-    glfw.glfwSetWindowShouldClose(window, glfw.GLFW_TRUE);
+
+pub fn get_window_should_close(window: api) bool {
+    return glfw.glfwWindowShouldClose(window) == 0;
+}
+pub fn window_should_close(window: api, value: bool) void {
+    if (value) {
+        glfw.glfwSetWindowShouldClose(window, engine.types.GLFW_TRUE);
+    } else {
+        glfw.glfwSetWindowShouldClose(window, engine.types.GLFW_FALSE);
+    }
 }

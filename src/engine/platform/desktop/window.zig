@@ -41,7 +41,6 @@ pub fn start(title: []const u8, window_size: [2]i32) api.api {
 
     return window.?;
 }
-
 pub fn stop(window: api.api) void {
     glfw.glfwDestroyWindow(window);
     glfw.glfwTerminate();
