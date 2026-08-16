@@ -37,7 +37,7 @@ pub fn texture_new(path: []const u8) struct { u32, [2]i32 } {
 
     glfw.glBindTexture(glfw.GL_TEXTURE_2D, 0);
 
-    std.debug.print("texture_new: [{any}], [{d}, {d}]\n", .{ id, size[0], size[1] });
+    std.debug.print("texture new: [{any}], [{d}, {d}]\n", .{ id, size[0], size[1] });
 
     return .{ id, size };
 }

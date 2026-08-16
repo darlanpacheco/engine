@@ -29,7 +29,6 @@ export function createTextureManager(getWasmExports, getMemory) {
         height: bitmap.height,
         pixels: imageData.data,
       });
-
       console.log(`texture new: [${id}], [${bitmap.width}, ${bitmap.height}]`);
     } catch (_) {
       console.error(`texture error`);
