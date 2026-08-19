@@ -346,7 +346,7 @@ PFNGLDRAWELEMENTSPROC glad_glDrawElements = NULL;
 PFNGLDRAWELEMENTSBASEVERTEXPROC glad_glDrawElementsBaseVertex = NULL;
 PFNGLDRAWELEMENTSINSTANCEDPROC glad_glDrawElementsInstanced = NULL;
 PFNGLDRAWELEMENTSINSTANCEDBASEVERTEXPROC
-    glad_glDrawElementsInstancedBaseVertex = NULL;
+glad_glDrawElementsInstancedBaseVertex = NULL;
 PFNGLDRAWRANGEELEMENTSPROC glad_glDrawRangeElements = NULL;
 PFNGLDRAWRANGEELEMENTSBASEVERTEXPROC glad_glDrawRangeElementsBaseVertex = NULL;
 PFNGLENABLEPROC glad_glEnable = NULL;
@@ -395,7 +395,7 @@ PFNGLGETFLOATVPROC glad_glGetFloatv = NULL;
 PFNGLGETFRAGDATAINDEXPROC glad_glGetFragDataIndex = NULL;
 PFNGLGETFRAGDATALOCATIONPROC glad_glGetFragDataLocation = NULL;
 PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC
-    glad_glGetFramebufferAttachmentParameteriv = NULL;
+glad_glGetFramebufferAttachmentParameteriv = NULL;
 PFNGLGETINTEGER64I_VPROC glad_glGetInteger64i_v = NULL;
 PFNGLGETINTEGER64VPROC glad_glGetInteger64v = NULL;
 PFNGLGETINTEGERI_VPROC glad_glGetIntegeri_v = NULL;
