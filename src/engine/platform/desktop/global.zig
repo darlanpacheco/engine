@@ -1,9 +1,9 @@
 const std = @import("std");
 const engine = @import("engine");
 
-// const stdio_lib = @cImport({
-//     @cInclude("stdio.h");
-// });
+const stdio_lib = @cImport({
+    @cInclude("stdio.h");
+});
 const glfw_lib = @cImport({
     @cInclude("glad.h");
     @cInclude("glfw3.h");
@@ -17,7 +17,11 @@ const miniaudio_lib = @cImport({
 const cgltf_lib = @cImport({
     @cInclude("cgltf.h");
 });
+// const steam_lib = @cImport({
+//     @cInclude("steam_api.h");
+// });
 
+pub const stdio = stdio_lib;
 pub const glfw = glfw_lib;
 pub const image = stb_image_lib;
 pub const audio = miniaudio_lib;

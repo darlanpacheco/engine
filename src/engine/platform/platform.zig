@@ -44,3 +44,8 @@ pub const texture = if (is_desktop)
     @import("desktop/texture.zig")
 else
     @import("web/texture.zig");
+
+pub const storage = if (is_desktop)
+    @import("desktop/storage.zig")
+else
+    @import("web/storage.zig");

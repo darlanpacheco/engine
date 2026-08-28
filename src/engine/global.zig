@@ -5,25 +5,51 @@ const engine = @import("engine");
 pub fn c_string_ptr(slice: []const u8) [*]const u8 {
     return slice.ptr;
 }
+
 pub fn c_read_file(allocator: std.mem.Allocator, path: []const u8) ![]u8 {
     const path_c = try allocator.dupeZ(u8, path);
     defer allocator.free(path_c);
 
-    const file_opt = engine.stdio.fopen(path_c.ptr, "rb");
+    const file_opt = api.global.stdio.fopen(path_c.ptr, "rb");
     if (file_opt == null) {
         @panic("file not found error");
     }
     const file = file_opt.?;
 
-    _ = engine.stdio.fseek(file, 0, 2);
-    const file_size = @as(usize, @intCast(engine.stdio.ftell(file)));
-    _ = engine.stdio.fseek(file, 0, 0);
+    _ = api.global.stdio.fseek(file, 0, 2);
+    const file_size = @as(usize, @intCast(api.global.stdio.ftell(file)));
+    _ = api.global.stdio.fseek(file, 0, 0);
 
     const buffer = try allocator.alloc(u8, file_size);
     errdefer allocator.free(buffer);
 
-    _ = engine.stdio.fread(buffer.ptr, 1, file_size, file);
+    _ = api.global.stdio.fread(buffer.ptr, 1, file_size, file);
     return buffer;
+}
+pub fn c_write_file(allocator: std.mem.Allocator, path: []const u8, data: []const u8) void {
+    const path_c = allocator.dupeZ(u8, path) catch {
+        @panic("out of memory error");
+    };
+    defer allocator.free(path_c);
+
+    const file_opt = api.global.stdio.fopen(path_c.ptr, "wb");
+    if (file_opt == null) {
+        @panic("could not open file for writing");
+    }
+
+    const file = file_opt.?;
+    defer _ = api.global.stdio.fclose(file);
+
+    const written = api.global.stdio.fwrite(
+        data.ptr,
+        1,
+        data.len,
+        file,
+    );
+
+    if (written != data.len) {
+        @panic("file write error");
+    }
 }
 
 pub fn get_projection_2d(viewport_size: [2]i32) [16]f32 {
