@@ -19,6 +19,10 @@ pub fn write(
     name: []const u8,
     data: []const u8,
 ) void {
+    if (!engine.global.c_exists_file(allocator, path)) {
+        new(allocator, path);
+    }
+
     var key_buf: [256]u8 = undefined;
     const flat_key = std.fmt.bufPrint(&key_buf, "{s}.{s}", .{ category, name }) catch {
         @panic("key path too long");
@@ -103,6 +107,10 @@ pub fn read(
     category: []const u8,
     name: []const u8,
 ) []u8 {
+    if (!engine.global.c_exists_file(allocator, path)) {
+        new(allocator, path);
+    }
+
     var key_buf: [256]u8 = undefined;
     const flat_key = std.fmt.bufPrint(&key_buf, "{s}.{s}", .{ category, name }) catch {
         @panic("key path too long");

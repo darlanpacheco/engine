@@ -51,6 +51,21 @@ pub fn c_write_file(allocator: std.mem.Allocator, path: []const u8, data: []cons
         @panic("file write error");
     }
 }
+pub fn c_exists_file(allocator: std.mem.Allocator, path: []const u8) bool {
+    const path_c = allocator.dupeZ(u8, path) catch {
+        @panic("out of memory error");
+    };
+    defer allocator.free(path_c);
+
+    const file_opt = api.global.stdio.fopen(path_c.ptr, "rb");
+
+    if (file_opt == null) {
+        return false;
+    }
+
+    _ = api.global.stdio.fclose(file_opt.?);
+    return true;
+}
 
 pub fn get_projection_2d(viewport_size: [2]i32) [16]f32 {
     const projection = engine.calculators.matrix16f_orthographic(0, @as(f32, @floatFromInt(viewport_size[0])), @as(f32, @floatFromInt(viewport_size[1])), 0, -1, 1);
